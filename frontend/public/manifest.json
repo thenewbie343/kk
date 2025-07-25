@@ -1,0 +1,61 @@
+{
+  "short_name": "Artisan Bakery",
+  "name": "Artisan Bakery & Café",
+  "description": "Fresh baked goods and specialty coffee crafted with passion",
+  "icons": [
+    {
+      "src": "pwa-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "pwa-icon-512.png", 
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#f59e0b",
+  "background_color": "#fef3c7",
+  "orientation": "portrait-primary",
+  "categories": ["food", "shopping", "lifestyle"],
+  "lang": "en-US",
+  "scope": "/",
+  "shortcuts": [
+    {
+      "name": "View Café Menu",
+      "short_name": "Café",
+      "description": "Browse our specialty coffee and beverages",
+      "url": "/cafe",
+      "icons": [
+        {
+          "src": "pwa-icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "View Bakery Menu", 
+      "short_name": "Bakery",
+      "description": "Explore our fresh baked goods and pastries",
+      "url": "/bakery",
+      "icons": [
+        {
+          "src": "pwa-icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
+}

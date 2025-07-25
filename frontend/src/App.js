@@ -1,7 +1,7 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, Plus, Minus, X, Coffee, Cookie, Clock, Mail, Phone, User, CheckCircle } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, X, Coffee, Cookie, Clock, Mail, Phone, User, CheckCircle, Smartphone, Download } from 'lucide-react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import './App.css';
@@ -81,6 +81,83 @@ const useCart = () => {
     throw new Error('useCart must be used within CartProvider');
   }
   return context;
+};
+
+// PWA Install Button Component
+const PWAInstallButton = () => {
+  const [showInstall, setShowInstall] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setShowInstall(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      const { outcome } = await installPrompt.userChoice;
+      if (outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      }
+      setInstallPrompt(null);
+      setShowInstall(false);
+    }
+  };
+
+  if (!showInstall || !installPrompt) return null;
+
+  return (
+    <motion.button
+      onClick={handleInstallClick}
+      className="fixed bottom-20 right-4 bg-amber-500 text-white p-3 rounded-full shadow-lg hover:bg-amber-600 z-50"
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.9 }}
+    >
+      <Download size={20} />
+    </motion.button>
+  );
+};
+
+// Offline Detection Component
+const OfflineIndicator = () => {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  if (isOnline) return null;
+
+  return (
+    <motion.div
+      className="fixed top-0 left-0 right-0 bg-red-500 text-white text-center py-2 z-50"
+      initial={{ y: -50, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+    >
+      📡 You're offline - Orders will sync when connected
+    </motion.div>
+  );
 };
 
 // Floating Cart Component
@@ -227,6 +304,7 @@ const CartModal = () => {
 // Navigation Component
 const Navigation = () => {
   const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   return (
     <motion.nav 
@@ -238,13 +316,14 @@ const Navigation = () => {
       <div className="container mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
           <motion.h1 
-            className="text-2xl font-bold text-amber-600 cursor-pointer"
+            className="text-xl md:text-2xl font-bold text-amber-600 cursor-pointer"
             whileHover={{ scale: 1.05 }}
             onClick={() => navigate('/')}
           >
             Artisan Bakery & Café
           </motion.h1>
           
+          {/* Desktop Menu */}
           <div className="hidden md:flex space-x-6">
             {[
               { name: 'Home', path: '/' },
@@ -262,7 +341,49 @@ const Navigation = () => {
               </motion.button>
             ))}
           </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden p-2"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            <div className="w-6 h-6 flex flex-col justify-around">
+              <span className="w-full h-0.5 bg-gray-800"></span>
+              <span className="w-full h-0.5 bg-gray-800"></span>
+              <span className="w-full h-0.5 bg-gray-800"></span>
+            </div>
+          </button>
         </div>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              className="md:hidden mt-4 py-4 border-t"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+            >
+              {[
+                { name: 'Home', path: '/' },
+                { name: 'Café', path: '/cafe' },
+                { name: 'Bakery', path: '/bakery' }
+              ].map((item) => (
+                <motion.button
+                  key={item.name}
+                  onClick={() => {
+                    navigate(item.path);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="block w-full text-left py-2 text-gray-700 hover:text-amber-600 font-medium"
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {item.name}
+                </motion.button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.nav>
   );
@@ -303,21 +424,21 @@ const Home = () => {
         
         {/* Floating Elements */}
         <FloatingElement delay={0}>
-          <div className="absolute top-20 left-20 text-6xl">🥐</div>
+          <div className="absolute top-20 left-10 md:left-20 text-4xl md:text-6xl">🥐</div>
         </FloatingElement>
         <FloatingElement delay={1}>
-          <div className="absolute top-40 right-32 text-5xl">☕</div>
+          <div className="absolute top-40 right-16 md:right-32 text-3xl md:text-5xl">☕</div>
         </FloatingElement>
         <FloatingElement delay={2}>
-          <div className="absolute bottom-40 left-40 text-4xl">🧁</div>
+          <div className="absolute bottom-40 left-20 md:left-40 text-3xl md:text-4xl">🧁</div>
         </FloatingElement>
         <FloatingElement delay={3}>
-          <div className="absolute bottom-32 right-20 text-5xl">🍞</div>
+          <div className="absolute bottom-32 right-10 md:right-20 text-4xl md:text-5xl">🍞</div>
         </FloatingElement>
 
-        <div className="relative z-10 text-center text-white">
+        <div className="relative z-10 text-center text-white px-4">
           <motion.h1
-            className="text-6xl md:text-8xl font-bold mb-6"
+            className="text-4xl md:text-6xl lg:text-8xl font-bold mb-6"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
@@ -326,7 +447,7 @@ const Home = () => {
           </motion.h1>
           
           <motion.h2
-            className="text-3xl md:text-5xl font-light mb-8"
+            className="text-2xl md:text-3xl lg:text-5xl font-light mb-8"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.3 }}
@@ -335,7 +456,7 @@ const Home = () => {
           </motion.h2>
 
           <motion.p
-            className="text-xl mb-12 max-w-2xl mx-auto"
+            className="text-lg md:text-xl mb-12 max-w-2xl mx-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.6 }}
@@ -352,7 +473,7 @@ const Home = () => {
           >
             <motion.button
               onClick={() => navigate('/cafe')}
-              className="bg-amber-500 text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-amber-600 transition-colors flex items-center space-x-2"
+              className="w-full md:w-auto bg-amber-500 text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-amber-600 transition-colors flex items-center justify-center space-x-2"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -362,7 +483,7 @@ const Home = () => {
             
             <motion.button
               onClick={() => navigate('/bakery')}
-              className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-white hover:text-gray-800 transition-colors flex items-center space-x-2"
+              className="w-full md:w-auto bg-transparent border-2 border-white text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-white hover:text-gray-800 transition-colors flex items-center justify-center space-x-2 mt-4 md:mt-0"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -374,10 +495,10 @@ const Home = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-gradient-to-b from-amber-50 to-white">
+      <section className="py-16 md:py-20 bg-gradient-to-b from-amber-50 to-white">
         <div className="container mx-auto px-6">
           <motion.h2
-            className="text-4xl font-bold text-center mb-16 text-gray-800"
+            className="text-3xl md:text-4xl font-bold text-center mb-16 text-gray-800"
             data-aos="fade-up"
           >
             Why Choose Artisan?
@@ -403,17 +524,50 @@ const Home = () => {
             ].map((feature, index) => (
               <motion.div
                 key={index}
-                className="text-center p-8 rounded-2xl bg-white shadow-lg hover:shadow-xl transition-shadow tilt-card"
+                className="text-center p-6 md:p-8 rounded-2xl bg-white shadow-lg hover:shadow-xl transition-shadow tilt-card"
                 data-aos="fade-up"
                 data-aos-delay={index * 200}
                 whileHover={{ y: -10 }}
               >
-                <div className="text-6xl mb-4">{feature.icon}</div>
-                <h3 className="text-2xl font-bold mb-4 text-gray-800">{feature.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                <div className="text-4xl md:text-6xl mb-4">{feature.icon}</div>
+                <h3 className="text-xl md:text-2xl font-bold mb-4 text-gray-800">{feature.title}</h3>
+                <p className="text-gray-600 leading-relaxed text-sm md:text-base">{feature.description}</p>
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* PWA Installation Prompt */}
+      <section className="py-16 bg-amber-50 text-center">
+        <div className="container mx-auto px-6">
+          <motion.div
+            className="max-w-2xl mx-auto"
+            data-aos="fade-up"
+          >
+            <Smartphone className="mx-auto text-amber-600 mb-4" size={48} />
+            <h3 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">
+              Get Our Mobile App!
+            </h3>
+            <p className="text-gray-600 mb-6 text-sm md:text-base">
+              Install our app for faster ordering, offline access, and exclusive mobile offers.
+              Works on all devices - no app store required!
+            </p>
+            <div className="flex flex-col md:flex-row gap-4 justify-center items-center">
+              <div className="flex items-center space-x-2 text-green-600">
+                <CheckCircle size={20} />
+                <span className="text-sm">Works offline</span>
+              </div>
+              <div className="flex items-center space-x-2 text-green-600">
+                <CheckCircle size={20} />
+                <span className="text-sm">Fast & secure</span>
+              </div>
+              <div className="flex items-center space-x-2 text-green-600">
+                <CheckCircle size={20} />
+                <span className="text-sm">Always up to date</span>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
     </div>
@@ -423,14 +577,41 @@ const Home = () => {
 // Menu Item Component
 const MenuItem = ({ item }) => {
   const { addToCart } = useCart();
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const handleAddToCart = () => {
-    addToCart({
+    const cartItem = {
       id: item.id,
       name: item.name,
       price: item.price,
       category: item.category
-    });
+    };
+    
+    addToCart(cartItem);
+    
+    // If offline, store in pending orders
+    if (!isOnline) {
+      const pendingOrders = JSON.parse(localStorage.getItem('pendingOrders') || '[]');
+      pendingOrders.push({
+        id: Date.now(),
+        data: cartItem,
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
+    }
   };
 
   return (
@@ -446,17 +627,18 @@ const MenuItem = ({ item }) => {
           src={item.image}
           alt={item.name}
           className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+          loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
       </div>
       
-      <div className="p-6">
+      <div className="p-4 md:p-6">
         <div className="flex justify-between items-start mb-3">
-          <h3 className="text-xl font-bold text-gray-800">{item.name}</h3>
-          <span className="text-2xl font-bold text-amber-600">${item.price.toFixed(2)}</span>
+          <h3 className="text-lg md:text-xl font-bold text-gray-800">{item.name}</h3>
+          <span className="text-xl md:text-2xl font-bold text-amber-600">${item.price.toFixed(2)}</span>
         </div>
         
-        <p className="text-gray-600 mb-4 leading-relaxed">{item.description}</p>
+        <p className="text-gray-600 mb-4 leading-relaxed text-sm md:text-base">{item.description}</p>
         
         {item.ingredients && item.ingredients.length > 0 && (
           <div className="mb-4">
@@ -476,12 +658,13 @@ const MenuItem = ({ item }) => {
         
         <motion.button
           onClick={handleAddToCart}
-          className="w-full bg-amber-500 text-white py-3 rounded-lg font-semibold hover:bg-amber-600 transition-colors flex items-center justify-center space-x-2"
+          className="w-full bg-amber-500 text-white py-3 rounded-lg font-semibold hover:bg-amber-600 transition-colors flex items-center justify-center space-x-2 disabled:bg-gray-400"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
+          disabled={!isOnline && !item.available}
         >
           <Plus size={20} />
-          <span>Add to Cart</span>
+          <span>{isOnline ? 'Add to Cart' : 'Add (Offline)'}</span>
         </motion.button>
       </div>
     </motion.div>
@@ -501,6 +684,11 @@ const Cafe = () => {
         setMenuItems(data);
       } catch (error) {
         console.error('Error fetching cafe menu:', error);
+        // Load from cache if available
+        const cached = localStorage.getItem('cafe-menu');
+        if (cached) {
+          setMenuItems(JSON.parse(cached));
+        }
       } finally {
         setLoading(false);
       }
@@ -525,7 +713,7 @@ const Cafe = () => {
     <div className="min-h-screen pt-20">
       {/* Hero Section */}
       <section 
-        className="h-96 flex items-center justify-center relative"
+        className="h-64 md:h-96 flex items-center justify-center relative"
         style={{
           backgroundImage: 'url(https://images.unsplash.com/photo-1447933601403-0c6688de566e)',
           backgroundSize: 'cover',
@@ -533,16 +721,16 @@ const Cafe = () => {
         }}
       >
         <div className="absolute inset-0 bg-black bg-opacity-40" />
-        <div className="relative z-10 text-center text-white">
+        <div className="relative z-10 text-center text-white px-4">
           <motion.h1
-            className="text-5xl font-bold mb-4"
+            className="text-3xl md:text-5xl font-bold mb-4"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
           >
             ☕ Café Menu
           </motion.h1>
           <motion.p
-            className="text-xl"
+            className="text-lg md:text-xl"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
@@ -553,9 +741,9 @@ const Cafe = () => {
       </section>
 
       {/* Menu Grid */}
-      <section className="py-16 bg-gradient-to-b from-amber-50 to-white">
+      <section className="py-12 md:py-16 bg-gradient-to-b from-amber-50 to-white">
         <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {menuItems.map((item, index) => (
               <div key={item.id} data-aos="fade-up" data-aos-delay={index * 100}>
                 <MenuItem item={item} />
@@ -581,6 +769,11 @@ const Bakery = () => {
         setMenuItems(data);
       } catch (error) {
         console.error('Error fetching bakery menu:', error);
+        // Load from cache if available
+        const cached = localStorage.getItem('bakery-menu');
+        if (cached) {
+          setMenuItems(JSON.parse(cached));
+        }
       } finally {
         setLoading(false);
       }
@@ -605,7 +798,7 @@ const Bakery = () => {
     <div className="min-h-screen pt-20">
       {/* Hero Section */}
       <section 
-        className="h-96 flex items-center justify-center relative"
+        className="h-64 md:h-96 flex items-center justify-center relative"
         style={{
           backgroundImage: 'url(https://images.unsplash.com/photo-1534432182912-63863115e106)',
           backgroundSize: 'cover',
@@ -613,16 +806,16 @@ const Bakery = () => {
         }}
       >
         <div className="absolute inset-0 bg-black bg-opacity-40" />
-        <div className="relative z-10 text-center text-white">
+        <div className="relative z-10 text-center text-white px-4">
           <motion.h1
-            className="text-5xl font-bold mb-4"
+            className="text-3xl md:text-5xl font-bold mb-4"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
           >
             🥖 Bakery Menu
           </motion.h1>
           <motion.p
-            className="text-xl"
+            className="text-lg md:text-xl"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
@@ -633,9 +826,9 @@ const Bakery = () => {
       </section>
 
       {/* Menu Grid */}
-      <section className="py-16 bg-gradient-to-b from-amber-50 to-white">
+      <section className="py-12 md:py-16 bg-gradient-to-b from-amber-50 to-white">
         <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {menuItems.map((item, index) => (
               <div key={item.id} data-aos="fade-up" data-aos-delay={index * 100}>
                 <MenuItem item={item} />
@@ -661,7 +854,21 @@ const Checkout = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSubmitted, setOrderSubmitted] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -674,30 +881,48 @@ const Checkout = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    const orderData = {
+      ...formData,
+      items: cart.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        category: item.category
+      })),
+      total_amount: getTotalPrice()
+    };
+
     try {
-      const orderData = {
-        ...formData,
-        items: cart.map(item => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          category: item.category
-        })),
-        total_amount: getTotalPrice()
-      };
+      if (isOnline) {
+        const response = await fetch(`${API}/orders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(orderData)
+        });
 
-      const response = await fetch(`${API}/orders`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(orderData)
-      });
-
-      if (response.ok) {
-        const order = await response.json();
-        setOrderDetails(order);
+        if (response.ok) {
+          const order = await response.json();
+          setOrderDetails(order);
+          setOrderSubmitted(true);
+          clearCart();
+        }
+      } else {
+        // Store offline order
+        const offlineOrder = {
+          id: Date.now().toString(),
+          ...orderData,
+          offline: true,
+          timestamp: new Date().toISOString()
+        };
+        
+        const pendingOrders = JSON.parse(localStorage.getItem('pendingOrders') || '[]');
+        pendingOrders.push({ id: offlineOrder.id, data: offlineOrder });
+        localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
+        
+        setOrderDetails(offlineOrder);
         setOrderSubmitted(true);
         clearCart();
       }
@@ -710,9 +935,9 @@ const Checkout = () => {
 
   if (cart.length === 0 && !orderSubmitted) {
     return (
-      <div className="min-h-screen pt-20 flex items-center justify-center">
+      <div className="min-h-screen pt-20 flex items-center justify-center px-4">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">Your cart is empty</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">Your cart is empty</h2>
           <button
             onClick={() => navigate('/')}
             className="bg-amber-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-600"
@@ -729,7 +954,7 @@ const Checkout = () => {
       <div className="min-h-screen pt-20 bg-gradient-to-b from-green-50 to-white">
         <div className="container mx-auto px-6 py-12">
           <motion.div
-            className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-8"
+            className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
@@ -741,13 +966,20 @@ const Checkout = () => {
               >
                 <CheckCircle className="mx-auto text-green-500 mb-4" size={64} />
               </motion.div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">Order Confirmed!</h1>
-              <p className="text-gray-600">Thank you for your order. We'll have it ready for pickup!</p>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
+                Order {orderDetails.offline ? 'Saved' : 'Confirmed'}!
+              </h1>
+              <p className="text-gray-600">
+                {orderDetails.offline 
+                  ? 'Order saved offline - will sync when connected' 
+                  : 'Thank you for your order. We\'ll have it ready for pickup!'
+                }
+              </p>
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-6 mb-6">
+            <div className="bg-gray-50 rounded-lg p-4 md:p-6 mb-6">
               <h2 className="text-xl font-bold text-gray-800 mb-4">Order Details</h2>
-              <div className="space-y-2 mb-4">
+              <div className="space-y-2 mb-4 text-sm md:text-base">
                 <p><span className="font-semibold">Order ID:</span> {orderDetails.id}</p>
                 <p><span className="font-semibold">Name:</span> {orderDetails.customer_name}</p>
                 <p><span className="font-semibold">Email:</span> {orderDetails.customer_email}</p>
@@ -758,7 +990,7 @@ const Checkout = () => {
               <h3 className="font-bold text-gray-800 mb-3">Items Ordered:</h3>
               <div className="space-y-2">
                 {orderDetails.items.map((item, index) => (
-                  <div key={index} className="flex justify-between">
+                  <div key={index} className="flex justify-between text-sm md:text-base">
                     <span>{item.quantity}x {item.name}</span>
                     <span>${(item.price * item.quantity).toFixed(2)}</span>
                   </div>
@@ -790,15 +1022,25 @@ const Checkout = () => {
     <div className="min-h-screen pt-20 bg-gray-50">
       <div className="container mx-auto px-6 py-12">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">Complete Your Order</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8 text-center">
+            Complete Your Order
+          </h1>
+          
+          {!isOnline && (
+            <div className="mb-6 p-4 bg-yellow-100 border border-yellow-300 rounded-lg">
+              <p className="text-yellow-800 text-sm">
+                📡 You're offline. Your order will be saved and processed when you're back online.
+              </p>
+            </div>
+          )}
           
           <div className="grid md:grid-cols-2 gap-8">
             {/* Order Summary */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg h-fit">
+            <div className="bg-white rounded-2xl p-4 md:p-6 shadow-lg h-fit">
               <h2 className="text-xl font-bold text-gray-800 mb-4">Order Summary</h2>
               <div className="space-y-3 mb-4">
                 {cart.map((item) => (
-                  <div key={item.id} className="flex justify-between items-center py-2 border-b">
+                  <div key={item.id} className="flex justify-between items-center py-2 border-b text-sm md:text-base">
                     <div>
                       <span className="font-medium">{item.name}</span>
                       <span className="text-gray-500 ml-2">x{item.quantity}</span>
@@ -808,7 +1050,7 @@ const Checkout = () => {
                 ))}
               </div>
               <div className="border-t pt-4">
-                <div className="flex justify-between items-center text-xl font-bold">
+                <div className="flex justify-between items-center text-lg md:text-xl font-bold">
                   <span>Total:</span>
                   <span className="text-amber-600">${getTotalPrice().toFixed(2)}</span>
                 </div>
@@ -816,7 +1058,7 @@ const Checkout = () => {
             </div>
 
             {/* Checkout Form */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
+            <div className="bg-white rounded-2xl p-4 md:p-6 shadow-lg">
               <h2 className="text-xl font-bold text-gray-800 mb-6">Your Information</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -830,7 +1072,7 @@ const Checkout = () => {
                     value={formData.customer_name}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm md:text-base"
                   />
                 </div>
 
@@ -845,7 +1087,7 @@ const Checkout = () => {
                     value={formData.customer_email}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm md:text-base"
                   />
                 </div>
 
@@ -860,7 +1102,7 @@ const Checkout = () => {
                     value={formData.customer_phone}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm md:text-base"
                   />
                 </div>
 
@@ -875,7 +1117,7 @@ const Checkout = () => {
                     value={formData.pickup_time}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm md:text-base"
                   />
                 </div>
 
@@ -888,7 +1130,7 @@ const Checkout = () => {
                     value={formData.special_requests}
                     onChange={handleInputChange}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm md:text-base"
                     placeholder="Any special instructions..."
                   />
                 </div>
@@ -898,7 +1140,7 @@ const Checkout = () => {
                   disabled={isSubmitting}
                   className="w-full bg-amber-500 text-white py-3 rounded-lg font-semibold hover:bg-amber-600 disabled:bg-gray-400 transition-colors"
                 >
-                  {isSubmitting ? 'Processing...' : 'Place Order'}
+                  {isSubmitting ? 'Processing...' : isOnline ? 'Place Order' : 'Save Order (Offline)'}
                 </button>
               </form>
             </div>
@@ -943,7 +1185,9 @@ function App() {
       <div className="App">
         <BrowserRouter>
           <Navigation />
+          <OfflineIndicator />
           <FloatingCart />
+          <PWAInstallButton />
           <CartModal />
           
           <PageTransition>
