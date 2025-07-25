@@ -174,6 +174,43 @@ SAMPLE_MENU_ITEMS = [
         "image": "https://images.unsplash.com/photo-1506619216599-9d16d0903dfd",
         "ingredients": ["Belgian chocolate", "Steamed milk", "Whipped cream"],
         "available": True
+    },
+    # Café Savory Items
+    {
+        "name": "Spiced Meat Patty Burger",
+        "description": "Juicy beef patty seasoned with our secret spice blend, served on fresh brioche",
+        "price": 8.99,
+        "category": "cafe",
+        "image": "https://images.unsplash.com/photo-1518057111178-44a106bad636",
+        "ingredients": ["Beef patty", "Brioche bun", "Secret spices", "Fresh lettuce"],
+        "available": True
+    },
+    {
+        "name": "Garden Veggie Patty",
+        "description": "House-made quinoa and black bean patty with avocado and fresh herbs",
+        "price": 7.99,
+        "category": "cafe",
+        "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
+        "ingredients": ["Quinoa", "Black beans", "Avocado", "Fresh herbs"],
+        "available": True
+    },
+    {
+        "name": "Grilled Chicken Sandwich",
+        "description": "Tender grilled chicken breast with pesto and sundried tomatoes",
+        "price": 9.50,
+        "category": "cafe",
+        "image": "https://images.unsplash.com/photo-1447933601403-0c6688de566e",
+        "ingredients": ["Chicken breast", "Pesto sauce", "Sundried tomatoes", "Ciabatta"],
+        "available": True
+    },
+    {
+        "name": "Fresh Breakfast Wrap",
+        "description": "Scrambled eggs, crispy bacon, and cheese wrapped in a warm tortilla",
+        "price": 6.75,
+        "category": "cafe",
+        "image": "https://images.unsplash.com/photo-1518057111178-44a106bad636",
+        "ingredients": ["Eggs", "Bacon", "Cheese", "Tortilla wrap"],
+        "available": True
     }
 ]
 
