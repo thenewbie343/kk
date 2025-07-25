@@ -310,6 +310,246 @@ async def get_analytics():
         "total_revenue": total_revenue
     }
 
+def send_order_confirmation_email(order: Order):
+    """Send order confirmation email to customer"""
+    if not EMAIL_CONFIG.email or not EMAIL_CONFIG.password:
+        print("Email configuration not set. Skipping email send.")
+        return False
+    
+    try:
+        # Create email content
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = f"Order Confirmation - Artisan Bakery & Café (#{order.id[:8]})"
+        msg['From'] = EMAIL_CONFIG.email
+        msg['To'] = order.customer_email
+        
+        # Create HTML email template
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #fef3c7; }}
+                .container {{ max-width: 600px; margin: 0 auto; background: white; border-radius: 10px; overflow: hidden; }}
+                .header {{ background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 30px; text-align: center; }}
+                .content {{ padding: 30px; }}
+                .order-details {{ background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0; }}
+                .items-table {{ width: 100%; border-collapse: collapse; margin: 15px 0; }}
+                .items-table th, .items-table td {{ padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; }}
+                .items-table th {{ background: #f3f4f6; font-weight: bold; }}
+                .total {{ font-size: 18px; font-weight: bold; color: #f59e0b; }}
+                .footer {{ background: #f3f4f6; padding: 20px; text-align: center; color: #6b7280; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🥐 Artisan Bakery & Café</h1>
+                    <h2>Order Confirmation</h2>
+                </div>
+                
+                <div class="content">
+                    <p>Dear {order.customer_name},</p>
+                    
+                    <p>Thank you for your order! We're excited to prepare your delicious items. Here are your order details:</p>
+                    
+                    <div class="order-details">
+                        <h3>📋 Order Information</h3>
+                        <p><strong>Order ID:</strong> #{order.id[:8]}</p>
+                        <p><strong>Customer:</strong> {order.customer_name}</p>
+                        <p><strong>Phone:</strong> {order.customer_phone}</p>
+                        <p><strong>Pickup Time:</strong> {order.pickup_time}</p>
+                        <p><strong>Order Date:</strong> {order.order_date.strftime('%B %d, %Y at %I:%M %p')}</p>
+                        {f'<p><strong>Special Requests:</strong> {order.special_requests}</p>' if order.special_requests else ''}
+                    </div>
+                    
+                    <h3>🛒 Your Items</h3>
+                    <table class="items-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+        """
+        
+        for item in order.items:
+            html_content += f"""
+                            <tr>
+                                <td>{item.name}</td>
+                                <td>{item.quantity}</td>
+                                <td>${item.price:.2f}</td>
+                                <td>${item.price * item.quantity:.2f}</td>
+                            </tr>
+            """
+        
+        html_content += f"""
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="total">Total Amount:</td>
+                                <td class="total">${order.total_amount:.2f}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    
+                    <p>🕒 <strong>Pickup Instructions:</strong></p>
+                    <ul>
+                        <li>Please arrive at your scheduled pickup time: <strong>{order.pickup_time}</strong></li>
+                        <li>Have your order ID ready: <strong>#{order.id[:8]}</strong></li>
+                        <li>Payment can be made at pickup (cash or card)</li>
+                    </ul>
+                    
+                    <p>We'll have your fresh items ready exactly when you need them. Thank you for choosing Artisan Bakery & Café!</p>
+                </div>
+                
+                <div class="footer">
+                    <p>🏪 Artisan Bakery & Café</p>
+                    <p>Fresh baked goods and specialty coffee crafted with passion</p>
+                    <p>Questions? Reply to this email or call us!</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Create plain text version
+        text_content = f"""
+        Order Confirmation - Artisan Bakery & Café
+        
+        Dear {order.customer_name},
+        
+        Thank you for your order! Here are your order details:
+        
+        Order ID: #{order.id[:8]}
+        Customer: {order.customer_name}
+        Phone: {order.customer_phone}
+        Pickup Time: {order.pickup_time}
+        Order Date: {order.order_date.strftime('%B %d, %Y at %I:%M %p')}
+        {f'Special Requests: {order.special_requests}' if order.special_requests else ''}
+        
+        YOUR ITEMS:
+        """
+        
+        for item in order.items:
+            text_content += f"- {item.name} x{item.quantity} = ${item.price * item.quantity:.2f}\n"
+        
+        text_content += f"""
+        
+        TOTAL: ${order.total_amount:.2f}
+        
+        Please arrive at your scheduled pickup time with your order ID.
+        
+        Thank you for choosing Artisan Bakery & Café!
+        """
+        
+        # Attach both versions
+        part1 = MIMEText(text_content, 'plain')
+        part2 = MIMEText(html_content, 'html')
+        
+        msg.attach(part1)
+        msg.attach(part2)
+        
+        # Send email
+        server = smtplib.SMTP(EMAIL_CONFIG.smtp_server, EMAIL_CONFIG.smtp_port)
+        server.starttls()
+        server.login(EMAIL_CONFIG.email, EMAIL_CONFIG.password)
+        text = msg.as_string()
+        server.sendmail(EMAIL_CONFIG.email, order.customer_email, text)
+        server.quit()
+        
+        print(f"Order confirmation email sent to {order.customer_email}")
+        return True
+        
+    except Exception as e:
+        print(f"Failed to send email: {str(e)}")
+        return False
+
+@api_router.post("/orders", response_model=Order)
+async def create_order(order_data: OrderCreate):
+    """Create a new order and send confirmation email"""
+    order = Order(**order_data.dict())
+    await db.orders.insert_one(order.dict())
+    
+    # Send confirmation email
+    send_order_confirmation_email(order)
+    
+    return order
+
+@api_router.get("/admin/orders", response_model=List[Order])
+async def get_all_orders_admin():
+    """Admin endpoint to get all orders with full details"""
+    orders = await db.orders.find().sort("order_date", -1).to_list(1000)
+    return [Order(**order) for order in orders]
+
+@api_router.get("/admin/orders/export")
+async def export_orders_csv():
+    """Export all orders as CSV file"""
+    orders = await db.orders.find().sort("order_date", -1).to_list(10000)
+    
+    # Create CSV content
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Write header
+    writer.writerow([
+        'Order ID', 'Date', 'Customer Name', 'Email', 'Phone', 
+        'Items', 'Total Amount', 'Pickup Time', 'Special Requests', 'Status'
+    ])
+    
+    # Write data
+    for order in orders:
+        items_str = "; ".join([f"{item['name']} x{item['quantity']}" for item in order['items']])
+        writer.writerow([
+            order['id'][:8],
+            order['order_date'].strftime('%Y-%m-%d %H:%M'),
+            order['customer_name'],
+            order['customer_email'], 
+            order['customer_phone'],
+            items_str,
+            f"${order['total_amount']:.2f}",
+            order['pickup_time'],
+            order.get('special_requests', ''),
+            order.get('status', 'pending')
+        ])
+    
+    output.seek(0)
+    
+    # Return as downloadable file
+    return StreamingResponse(
+        io.BytesIO(output.getvalue().encode('utf-8')),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=bakery_orders.csv"}
+    )
+
+@api_router.get("/admin/stats")
+async def get_admin_stats():
+    """Get admin dashboard statistics"""
+    total_orders = await db.orders.count_documents({})
+    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_orders = await db.orders.count_documents({"order_date": {"$gte": today}})
+    
+    # Calculate today's revenue
+    today_revenue_pipeline = [
+        {"$match": {"order_date": {"$gte": today}}},
+        {"$group": {"_id": None, "total": {"$sum": "$total_amount"}}}
+    ]
+    today_revenue_result = await db.orders.aggregate(today_revenue_pipeline).to_list(1)
+    today_revenue = today_revenue_result[0]["total"] if today_revenue_result else 0
+    
+    # Get recent orders
+    recent_orders = await db.orders.find().sort("order_date", -1).limit(5).to_list(5)
+    
+    return {
+        "total_orders": total_orders,
+        "today_orders": today_orders,
+        "today_revenue": today_revenue,
+        "recent_orders": [Order(**order) for order in recent_orders]
+    }
+
 # Include the router in the main app
 app.include_router(api_router)
 
