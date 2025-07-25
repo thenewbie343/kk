@@ -1,7 +1,7 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, Plus, Minus, X, Coffee, Cookie, Clock, Mail, Phone, User, CheckCircle, Smartphone, Download } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, X, Coffee, Cookie, Clock, Mail, Phone, User, CheckCircle, Smartphone, Download, BarChart3, Users, DollarSign } from 'lucide-react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import './App.css';
