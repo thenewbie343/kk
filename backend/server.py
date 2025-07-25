@@ -69,6 +69,18 @@ class OrderCreate(BaseModel):
     pickup_time: str
     special_requests: Optional[str] = ""
 
+class EmailConfig(BaseModel):
+    smtp_server: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    email: str = ""
+    password: str = ""
+    
+# Email configuration (you'll need to set these environment variables)
+EMAIL_CONFIG = EmailConfig(
+    email=os.environ.get('SMTP_EMAIL', ''),
+    password=os.environ.get('SMTP_PASSWORD', ''),
+)
+
 # Sample menu items
 SAMPLE_MENU_ITEMS = [
     # Bakery Items
