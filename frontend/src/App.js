@@ -1128,7 +1128,264 @@ const Bakery = () => {
   );
 };
 
-// Checkout Page Component
+// Admin Panel Component
+const AdminPanel = () => {
+  const [orders, setOrders] = useState([]);
+  const [stats, setStats] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('dashboard');
+
+  useEffect(() => {
+    fetchAdminData();
+  }, []);
+
+  const fetchAdminData = async () => {
+    try {
+      const [ordersResponse, statsResponse] = await Promise.all([
+        fetch(`${API}/admin/orders`),
+        fetch(`${API}/admin/stats`)
+      ]);
+      
+      if (ordersResponse.ok && statsResponse.ok) {
+        setOrders(await ordersResponse.json());
+        setStats(await statsResponse.json());
+      }
+    } catch (error) {
+      console.error('Error fetching admin data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      const response = await fetch(`${API}/admin/orders/export`);
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'bakery_orders.csv';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-20 flex items-center justify-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen pt-20 bg-gray-50">
+      <div className="container mx-auto px-6 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Admin Dashboard</h1>
+          <p className="text-gray-600">Manage your bakery orders and view analytics</p>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex space-x-1 bg-gray-200 p-1 rounded-lg mb-8">
+          {[
+            { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+            { id: 'orders', label: 'Orders', icon: ShoppingCart }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-md font-medium transition-colors ${
+                activeTab === tab.id
+                  ? 'bg-white text-amber-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              <tab.icon size={18} />
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Dashboard Tab */}
+        {activeTab === 'dashboard' && (
+          <div className="space-y-6">
+            {/* Stats Cards */}
+            <div className="grid md:grid-cols-3 gap-6">
+              <motion.div
+                className="bg-white p-6 rounded-2xl shadow-lg"
+                whileHover={{ y: -2 }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-600 text-sm">Total Orders</p>
+                    <p className="text-2xl font-bold text-gray-800">{stats.total_orders || 0}</p>
+                  </div>
+                  <div className="bg-blue-100 p-3 rounded-full">
+                    <ShoppingCart className="text-blue-600" size={24} />
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                className="bg-white p-6 rounded-2xl shadow-lg"
+                whileHover={{ y: -2 }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-600 text-sm">Today's Orders</p>
+                    <p className="text-2xl font-bold text-gray-800">{stats.today_orders || 0}</p>
+                  </div>
+                  <div className="bg-green-100 p-3 rounded-full">
+                    <Users className="text-green-600" size={24} />
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                className="bg-white p-6 rounded-2xl shadow-lg"
+                whileHover={{ y: -2 }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-600 text-sm">Today's Revenue</p>
+                    <p className="text-2xl font-bold text-gray-800">${(stats.today_revenue || 0).toFixed(2)}</p>
+                  </div>
+                  <div className="bg-amber-100 p-3 rounded-full">
+                    <DollarSign className="text-amber-600" size={24} />
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Recent Orders */}
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-800">Recent Orders</h2>
+                <button
+                  onClick={handleExportCSV}
+                  className="bg-amber-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-amber-600 transition-colors flex items-center space-x-2"
+                >
+                  <Download size={18} />
+                  <span>Export CSV</span>
+                </button>
+              </div>
+              
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-3 px-2">Order ID</th>
+                      <th className="text-left py-3 px-2">Customer</th>
+                      <th className="text-left py-3 px-2">Items</th>
+                      <th className="text-left py-3 px-2">Total</th>
+                      <th className="text-left py-3 px-2">Pickup Time</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(stats.recent_orders || []).map((order) => (
+                      <tr key={order.id} className="border-b hover:bg-gray-50">
+                        <td className="py-3 px-2 font-medium">#{order.id.substring(0, 8)}</td>
+                        <td className="py-3 px-2">{order.customer_name}</td>
+                        <td className="py-3 px-2 text-sm">
+                          {order.items.slice(0, 2).map(item => item.name).join(', ')}
+                          {order.items.length > 2 && `... +${order.items.length - 2} more`}
+                        </td>
+                        <td className="py-3 px-2 font-semibold text-amber-600">${order.total_amount.toFixed(2)}</td>
+                        <td className="py-3 px-2 text-sm">{new Date(order.pickup_time).toLocaleDateString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Orders Tab */}
+        {activeTab === 'orders' && (
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-gray-800">All Orders ({orders.length})</h2>
+              <button
+                onClick={handleExportCSV}
+                className="bg-amber-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-amber-600 transition-colors flex items-center space-x-2"
+              >
+                <Download size={18} />
+                <span>Export CSV</span>
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {orders.map((order) => (
+                <motion.div
+                  key={order.id}
+                  className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <div className="flex items-center space-x-3 mb-2">
+                        <h3 className="font-bold text-lg">#{order.id.substring(0, 8)}</h3>
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
+                          {order.status || 'Pending'}
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-1 text-sm">
+                        <p><span className="font-medium">Customer:</span> {order.customer_name}</p>
+                        <p><span className="font-medium">Email:</span> {order.customer_email}</p>
+                        <p><span className="font-medium">Phone:</span> {order.customer_phone}</p>
+                        <p><span className="font-medium">Pickup:</span> {new Date(order.pickup_time).toLocaleString()}</p>
+                        <p><span className="font-medium">Ordered:</span> {new Date(order.order_date).toLocaleString()}</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-medium mb-2">Items Ordered:</h4>
+                      <div className="space-y-1 text-sm">
+                        {order.items.map((item, index) => (
+                          <div key={index} className="flex justify-between">
+                            <span>{item.quantity}x {item.name}</span>
+                            <span>${(item.price * item.quantity).toFixed(2)}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="border-t mt-2 pt-2">
+                        <div className="flex justify-between font-bold">
+                          <span>Total:</span>
+                          <span className="text-amber-600">${order.total_amount.toFixed(2)}</span>
+                        </div>
+                      </div>
+                      
+                      {order.special_requests && (
+                        <div className="mt-2">
+                          <p className="text-sm"><span className="font-medium">Special Requests:</span></p>
+                          <p className="text-sm text-gray-600 italic">{order.special_requests}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 const Checkout = () => {
   const { cart, getTotalPrice, clearCart } = useCart();
   const [formData, setFormData] = useState({
