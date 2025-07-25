@@ -1742,6 +1742,7 @@ function App() {
               <Route path="/cafe" element={<Cafe />} />
               <Route path="/bakery" element={<Bakery />} />
               <Route path="/checkout" element={<Checkout />} />
+              <Route path="/admin" element={<AdminPanel />} />
             </Routes>
           </PageTransition>
         </BrowserRouter>
