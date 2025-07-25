@@ -538,6 +538,293 @@ const Home = () => {
         </div>
       </section>
 
+      {/* About Our Bakery Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <motion.div data-aos="fade-right">
+              <img
+                src="https://images.unsplash.com/photo-1534432182912-63863115e106"
+                alt="Fresh artisan breads"
+                className="rounded-2xl shadow-2xl w-full h-96 object-cover"
+              />
+            </motion.div>
+            <motion.div data-aos="fade-left">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
+                🍞 Artisan Bakery
+              </h2>
+              <p className="text-gray-600 text-lg leading-relaxed mb-6">
+                Every morning at 4 AM, our master bakers begin the ancient ritual of bread making. 
+                Using traditional techniques passed down through generations, we craft each loaf 
+                with patience, precision, and passion.
+              </p>
+              
+              <div className="space-y-4 mb-8">
+                <div className="flex items-center space-x-3">
+                  <div className="text-2xl">🌾</div>
+                  <div>
+                    <h4 className="font-bold text-gray-800">Freshly Baked Breads</h4>
+                    <p className="text-gray-600 text-sm">Sourdough, multigrain, ciabatta - baked fresh daily</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="text-2xl">🥐</div>
+                  <div>
+                    <h4 className="font-bold text-gray-800">Flaky Croissants</h4>
+                    <p className="text-gray-600 text-sm">Buttery, golden croissants with 72-hour fermentation</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="text-2xl">🧁</div>
+                  <div>
+                    <h4 className="font-bold text-gray-800">Artisan Pastries</h4>
+                    <p className="text-gray-600 text-sm">Danish, éclairs, and seasonal specialties</p>
+                  </div>
+                </div>
+              </div>
+
+              <motion.button
+                onClick={() => navigate('/bakery')}
+                className="bg-amber-500 text-white px-8 py-3 rounded-full font-semibold hover:bg-amber-600 transition-colors"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                View Bakery Menu
+              </motion.button>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* About Our Café Section */}
+      <section className="py-20 bg-gradient-to-br from-amber-50 to-orange-50">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <motion.div data-aos="fade-right" className="order-2 md:order-1">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
+                ☕ Specialty Café
+              </h2>
+              <p className="text-gray-600 text-lg leading-relaxed mb-6">
+                Our café is where comfort meets sophistication. From expertly crafted coffee 
+                to hearty savory items, we serve soul-warming food that brings people together. 
+                Every cup is brewed to perfection, every bite made with love.
+              </p>
+              
+              <div className="space-y-4 mb-8">
+                <div className="flex items-center space-x-3">
+                  <div className="text-2xl">☕</div>
+                  <div>
+                    <h4 className="font-bold text-gray-800">Premium Coffee</h4>
+                    <p className="text-gray-600 text-sm">Single-origin beans, expert roasting, perfect brewing</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="text-2xl">🥪</div>
+                  <div>
+                    <h4 className="font-bold text-gray-800">Fresh Patties & Sandwiches</h4>
+                    <p className="text-gray-600 text-sm">Savory meat patties, veggie burgers, gourmet sandwiches</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="text-2xl">🍰</div>
+                  <div>
+                    <h4 className="font-bold text-gray-800">Sweet Treats</h4>
+                    <p className="text-gray-600 text-sm">Cakes, muffins, cookies - perfect with your coffee</p>
+                  </div>
+                </div>
+              </div>
+
+              <motion.button
+                onClick={() => navigate('/cafe')}
+                className="bg-amber-500 text-white px-8 py-3 rounded-full font-semibold hover:bg-amber-600 transition-colors"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Explore Café Menu
+              </motion.button>
+            </motion.div>
+
+            <motion.div data-aos="fade-left" className="order-1 md:order-2">
+              <img
+                src="https://images.unsplash.com/photo-1509042239860-f550ce710b93"
+                alt="Specialty café beverages"
+                className="rounded-2xl shadow-2xl w-full h-96 object-cover"
+              />
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Daily Specials Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-6">
+          <motion.div className="text-center mb-16" data-aos="fade-up">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+              Today's Special Delights
+            </h2>
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+              Every day brings new flavors and fresh creations. Here's what our chefs 
+              are excited to share with you today.
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                emoji: "🍖",
+                title: "Spiced Meat Patties",
+                description: "Juicy beef patties seasoned with our secret blend of spices, served on fresh brioche buns",
+                time: "Available all day",
+                price: "$8.99"
+              },
+              {
+                emoji: "🌱",
+                title: "Garden Veggie Burger",
+                description: "House-made veggie patty with quinoa, black beans, and fresh herbs. Served with avocado",
+                time: "Lunch special",
+                price: "$7.99"
+              },
+              {
+                emoji: "🥖",
+                title: "Fresh Sourdough Loaf",
+                description: "Our signature sourdough with a perfect crust and tangy, airy interior. Baked this morning",
+                time: "Limited quantity",
+                price: "$6.50"
+              }
+            ].map((special, index) => (
+              <motion.div
+                key={index}
+                className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 text-center hover:shadow-lg transition-shadow"
+                data-aos="fade-up"
+                data-aos-delay={index * 200}
+                whileHover={{ y: -5 }}
+              >
+                <div className="text-5xl mb-4">{special.emoji}</div>
+                <h3 className="text-xl font-bold text-gray-800 mb-3">{special.title}</h3>
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">{special.description}</p>
+                <div className="space-y-2">
+                  <p className="text-amber-600 font-semibold">{special.time}</p>
+                  <p className="text-2xl font-bold text-gray-800">{special.price}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Our Process Section */}
+      <section className="py-20 bg-gradient-to-r from-amber-100 to-orange-100">
+        <div className="container mx-auto px-6">
+          <motion.div className="text-center mb-16" data-aos="fade-up">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+              From Dawn to Delight
+            </h2>
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+              Every day at Artisan Bakery & Café begins before sunrise. Here's how we create 
+              the magic that ends up on your plate.
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-4 gap-8">
+            {[
+              {
+                time: "4:00 AM",
+                title: "Dough Preparation",
+                description: "Our bakers start mixing, kneading, and shaping tomorrow's bread",
+                icon: "👨‍🍳"
+              },
+              {
+                time: "6:00 AM", 
+                title: "Fresh Baking",
+                description: "Ovens fire up, filling the air with the aroma of fresh bread and pastries",
+                icon: "🔥"
+              },
+              {
+                time: "8:00 AM",
+                title: "Café Opens",
+                description: "First coffee is brewed, patties are prepared, doors open to welcome you",
+                icon: "☕"
+              },
+              {
+                time: "All Day",
+                title: "Continuous Quality", 
+                description: "Fresh batches throughout the day, ensuring everything is at its peak",
+                icon: "✨"
+              }
+            ].map((step, index) => (
+              <motion.div
+                key={index}
+                className="text-center"
+                data-aos="fade-up"
+                data-aos-delay={index * 200}
+                whileHover={{ scale: 1.05 }}
+              >
+                <div className="bg-white rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <span className="text-3xl">{step.icon}</span>
+                </div>
+                <div className="bg-amber-500 text-white py-1 px-3 rounded-full text-sm font-semibold mb-3 inline-block">
+                  {step.time}
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 mb-3">{step.title}</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">{step.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Customer Testimonials Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-6">
+          <motion.div className="text-center mb-16" data-aos="fade-up">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+              What Our Customers Say
+            </h2>
+            <p className="text-gray-600 text-lg">
+              Don't just take our word for it - hear from our happy customers!
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                name: "Sarah Johnson",
+                rating: "★★★★★",
+                text: "The best croissants in town! Flaky, buttery, and always fresh. Their coffee is exceptional too.",
+                item: "Regular customer"
+              },
+              {
+                name: "Mike Chen", 
+                rating: "★★★★★",
+                text: "I come here every morning for their meat patties. Perfectly seasoned and always cooked to perfection!",
+                item: "Café enthusiast"
+              },
+              {
+                name: "Emma Davis",
+                rating: "★★★★★", 
+                text: "The sourdough bread is absolutely divine. You can taste the love and craftsmanship in every bite.",
+                item: "Bread lover"
+              }
+            ].map((testimonial, index) => (
+              <motion.div
+                key={index}
+                className="bg-gray-50 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow"
+                data-aos="fade-up"
+                data-aos-delay={index * 200}
+                whileHover={{ y: -5 }}
+              >
+                <div className="text-amber-500 text-xl mb-3">{testimonial.rating}</div>
+                <p className="text-gray-700 italic mb-4 leading-relaxed">"{testimonial.text}"</p>
+                <div className="border-t pt-4">
+                  <p className="font-bold text-gray-800">{testimonial.name}</p>
+                  <p className="text-sm text-gray-500">{testimonial.item}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* PWA Installation Prompt */}
       <section className="py-16 bg-amber-50 text-center">
         <div className="container mx-auto px-6">
