@@ -328,7 +328,8 @@ const Navigation = () => {
             {[
               { name: 'Home', path: '/' },
               { name: 'Café', path: '/cafe' },
-              { name: 'Bakery', path: '/bakery' }
+              { name: 'Bakery', path: '/bakery' },
+              { name: 'Admin', path: '/admin' }
             ].map((item) => (
               <motion.button
                 key={item.name}
